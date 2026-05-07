@@ -1,0 +1,53 @@
+///////////////////////////////////////////////////////////////////////////////
+
+These are the used command for simulating this core.
+- meant to be used with Verilator. 
+- They should generate a module_sim file inside obj_dir.
+- They should generate the .vcd file for waves.
+- open .vcd files from windows and not wsl.
+
+///////////////////////////////////////////////////////////////////////////////
+
+
+#Layer-1 --Immidiate Generator----------------------------------------------------------------
+
+verilator --binary --sv -j 0 --trace \
+  src/immediate_gen.sv tb/imm_gen_tb.sv \
+  --top-module imm_gen_tb -o imm_gen_sim
+
+./obj_dir/imm_gen_sim
+
+
+#Layer-2 --Decoder----------------------------------------------------------------
+
+verilator --binary --sv -j 0 --trace --Wno-WIDTHEXPAND \
+  src/decoder.sv tb/decoder_tb.sv \
+  --top-module decoder_tb -o decoder_sim
+
+./obj_dir/decoder_sim
+
+
+#Layer-3 --Data Memory----------------------------------------------------------------
+
+verilator --binary --sv -j 0 --trace --Wno-WIDTHEXPAND \
+  src/data_mem.sv tb/data_mem_tb.sv \
+  --top-module data_mem_tb -o data_mem_sim
+
+./obj_dir/data_mem_sim
+
+
+#Layer-4 --Top module----------------------------------------------------------------
+
+verilator --binary --sv -j 0 --trace --public-flat-rw \
+  src/alu.sv \
+  src/program_counter.sv \
+  src/instruction_mem.sv \
+  src/immediate_gen.sv \
+  src/register_file.sv \
+  src/decoder.sv \
+  src/data_mem.sv \
+  src/cpu_top.sv \
+  tb/cpu_top_tb.sv \
+  --top-module cpu_top_tb -o cpu_sim
+
+./obj_dir/cpu_sim
